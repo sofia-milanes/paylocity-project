@@ -209,7 +209,7 @@ public abstract class BasePage {
         }
         ele.sendKeys(Keys.chord(modifierKey, "a"));
         ele.sendKeys(Keys.BACK_SPACE);
-        ele.sendKeys(Keys.ESCAPE);
+        //ele.sendKeys(Keys.ESCAPE);
         paylocityWait().waitUntilStable();
     }
 

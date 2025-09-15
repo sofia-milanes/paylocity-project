@@ -6,9 +6,9 @@ import org.openqa.selenium.By;
 import java.util.Optional;
 
 public class LoginPage extends BasePage {
-    private By userNameField = By.cssSelector("input[name='Username']");
-    private By passwordField = By.cssSelector("input[name='Password']");
-    private By loginButton = By.cssSelector("button[type='submit']");
+    private static final By userNameField = By.cssSelector("input[name='Username']");
+    private static final By passwordField = By.cssSelector("input[name='Password']");
+    private static final By loginButton = By.cssSelector("button[type='submit']");
 
     public void doLogin(String username, String password) {
         enterUsername(username);

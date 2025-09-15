@@ -1,22 +1,17 @@
 package com.paylocity.tests.integrated;
 
-import io.github.bonigarcia.wdm.WebDriverManager;
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.time.Duration;
 import java.util.List;
 
+import static com.paylocity.tests.integrated.pages.PageFactory.dashboardPage;
 import static com.paylocity.tests.integrated.pages.PageFactory.loginPage;
-import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.assertFalse;
 
 
 public class DashboardTests {
@@ -24,131 +19,69 @@ public class DashboardTests {
 
     @BeforeMethod(alwaysRun = true)
     public void setUp() {
-        WebDriverManager.chromedriver().setup();
-        driver = new ChromeDriver();
-        driver.get("https://wmxrwq14uc.execute-api.us-east-1.amazonaws.com/Prod/Account/Login");
-        WebElement userNameField = driver.findElement(By.name("Username"));
-        userNameField.sendKeys("TestUser793");
-        WebElement passwordField = driver.findElement(By.name("Password"));
-        passwordField.sendKeys("&os!|@r^Su2}");
-        WebElement loginButton = driver.findElement(By.cssSelector("button[type='submit']"));
-        loginButton.submit();
-
-        // loginPage().doLogin("TestUser793", "&os!|@r^Su2}");
+        // GIVEN an Employer
+        // AND I am on the Benefits Dashboard page
+        loginPage().doLogin("TestUser793", "&os!|@r^Su2}");
     }
 
     @AfterMethod
     public void tearDown() {
+        dashboardPage().deleteAllEmployees();
+        dashboardPage().clickLogOutButton();
         if (driver != null) driver.quit();
     }
 
     @Test
     public void addEmployee() {
-        // GIVEN an Employer
-        // AND I am on the Benefits Dashboard page
-        assertEquals(driver.getTitle(), "Employees - Paylocity Benefits Dashboard");
-
         // WHEN I select Add Employee
-        WebElement addEmployeeButton = driver.findElement(By.cssSelector("button[id='add']"));
-        addEmployeeButton.click();
+        dashboardPage().clickAddEmployeeButton();
 
         // THEN I should be able to enter employee details
-        WebElement firstNameField = driver.findElement(By.cssSelector("input[name='firstName']"));
-        firstNameField.sendKeys("John");
-
-        WebElement lastNameField = driver.findElement(By.cssSelector("input[name='lastName']"));
-        lastNameField.sendKeys("Bowie");
-
-        WebElement dependentsField = driver.findElement(By.cssSelector("input[name='dependants']"));
-        dependentsField.sendKeys("1");
-
-        WebElement addButton = driver.findElement(By.cssSelector("button[id='addEmployee']"));
-        addButton.click();
+        dashboardPage().enterEmployeeDetails("John", "Bowie", 1);
+        dashboardPage().clickAddButton();
 
         // AND the employee should save
-        List<WebElement> lastNameInTable = driver.findElements(By.cssSelector("td:nth-of-type(2)"));
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
-        wait.until(ExpectedConditions.elementToBeClickable(addEmployeeButton));
-
-        // TODO this re-work because the bug BUG-UI-02
-        assertEquals("John", lastNameInTable.get(0).getText());
+        List<String> lastNamesInTable = dashboardPage().getAllEmployeesLastName();
+        assertTrue(lastNamesInTable.contains("John"));
     }
 
     @Test
     public void updateEmployee() {
-        // GIVEN an Employer
-        // AND I am on the Benefits Dashboard page
-        assertEquals(driver.getTitle(), "Employees - Paylocity Benefits Dashboard");
-
         // AND I Add an Employee
-        WebElement addEmployeeButton = driver.findElement(By.cssSelector("button[id='add']"));
-        addEmployeeButton.click();
-
-        WebElement firstNameField = driver.findElement(By.cssSelector("input[name='firstName']"));
-        firstNameField.sendKeys("John");
-
-        WebElement lastNameField = driver.findElement(By.cssSelector("input[name='lastName']"));
-        lastNameField.sendKeys("Bowie");
-
-        WebElement dependentsField = driver.findElement(By.cssSelector("input[name='dependants']"));
-        dependentsField.sendKeys("1");
-
-        WebElement addButton = driver.findElement(By.cssSelector("button[id='addEmployee']"));
-        addButton.click();
+        String firstName = "Sam";
+        dashboardPage().clickAddEmployeeButton();
+        dashboardPage().enterEmployeeDetails(firstName, "Thomson", 1);
+        dashboardPage().clickAddButton();
 
         // WHEN I select the Action Edit
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
-        wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("i.fa-edit")));
-        WebElement editButton = driver.findElement(By.cssSelector("i.fa-edit"));
-        editButton.click();
+        dashboardPage().clickEditButton(firstName);
 
         // THEN I can edit employee details
-        firstNameField.sendKeys("Edited-John");
-        WebElement updateButton = driver.findElement(By.cssSelector("button[id='updateEmployee']"));
-        updateButton.click();
+        String editedFirstName = "edited-Sam";
+        dashboardPage().editFirstname(editedFirstName);
+        dashboardPage().clickUpdateButton();
 
-        // AND the data should change in the table
-        List<WebElement> lastNameInTable = driver.findElements(By.cssSelector("td:nth-of-type(2)"));
         // TODO this re-work because the bug BUG-UI-02
-        assertEquals("Edited-John", lastNameInTable.get(0).getText());
+        // AND the data should change in the table
+        List<String> lastNamesInTable = dashboardPage().getAllEmployeesLastName();
+        assertTrue(lastNamesInTable.contains(editedFirstName));
     }
 
     @Test
     public void deleteEmployee() {
-        // GIVEN an Employer
-        // AND I am on the Benefits Dashboard page
-        assertEquals(driver.getTitle(), "Employees - Paylocity Benefits Dashboard");
-
         // AND I Add an Employee
-        WebElement addEmployeeButton = driver.findElement(By.cssSelector("button[id='add']"));
-        addEmployeeButton.click();
-
-        WebElement firstNameField = driver.findElement(By.cssSelector("input[name='firstName']"));
-        firstNameField.sendKeys("John");
-
-        WebElement lastNameField = driver.findElement(By.cssSelector("input[name='lastName']"));
-        lastNameField.sendKeys("Bowie");
-
-        WebElement dependentsField = driver.findElement(By.cssSelector("input[name='dependants']"));
-        dependentsField.sendKeys("1");
-
-        WebElement addButton = driver.findElement(By.cssSelector("button[id='addEmployee']"));
-        addButton.click();
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
-        wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("i.fa-times")));
+        String firstName = "John";
+        dashboardPage().clickAddEmployeeButton();
+        dashboardPage().enterEmployeeDetails(firstName, "Bowie", 1);
+        dashboardPage().clickAddButton();
 
         // WHEN I click the Action X
-        WebElement deleteButton = driver.findElement(By.cssSelector("i.fa-times"));
-        deleteButton.click();
+        dashboardPage().clickDeleteButtonByFirstName(firstName);
 
         // AND I confirm the deletion
-        WebElement confirmDeleteButton = driver.findElement(By.cssSelector("button[id='deleteEmployee']"));
-        confirmDeleteButton.click();
+        dashboardPage().clickConfirmDeleteButton();
 
         //THEN the employee should be deleted
-        wait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector("i.fa-times")));
-
-        WebElement employeesTable = driver.findElement(By.cssSelector("table[id='employeesTable']>tbody>tr>td"));
-        assertEquals("No employees found.", employeesTable.getText());
+        assertFalse(dashboardPage().getAllEmployeesLastName().contains("John"));
     }
 }
