@@ -13,6 +13,7 @@ import org.openqa.selenium.remote.UnreachableBrowserException;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -25,33 +26,33 @@ import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
 public enum DriverType {
-    FIREFOX {
-        @Override
-        WebDriver createDriver() {
-            FirefoxOptions options = new FirefoxOptions();
-            WebDriver driver = new FirefoxDriver(options);
-            driver.manage().timeouts().pageLoadTimeout(24, TimeUnit.SECONDS);
-            driver.manage().timeouts().setScriptTimeout(30, TimeUnit.SECONDS);
-            return driver;
-        }
-    },
+//    FIREFOX {
+//        @Override
+//        WebDriver createDriver() {
+//            FirefoxOptions options = new FirefoxOptions();
+//            WebDriver driver = new FirefoxDriver(options);
+//            driver.manage().timeouts().pageLoadTimeout(24, TimeUnit.SECONDS);
+//            driver.manage().timeouts().setScriptTimeout(30, TimeUnit.SECONDS);
+//            return driver;
+//        }
+//    },
 
     CHROME {
         @Override
         WebDriver createDriver() {
-            boolean isWin = System.getProperty("os.name").contains("Windows");
-            setDriverPropertyIfUnset("webdriver.chrome.driver", driverDir + "chromedriver" + (isWin ? ".exe" : ""));
-            HashMap<String, Object> chromePref = new HashMap<String, Object>();
-            chromePref.put("profile.default_content_settings.popups", 0);
-            chromePref.put("download.default_directory", System.getProperty("user.dir") + "/src/downloads");
+            String driverDir = "src/test/java/com/paylocity/tests/integrated/tests/drivers/";
+            setDriverPropertyIfUnset(driverDir + "chromedriver");
             ChromeOptions options = new ChromeOptions();
+            HashMap<String, Object> chromePref = new HashMap<>();
+            chromePref.put("download.default_directory", System.getProperty("user.dir") + "/src/downloads");
             options.setExperimentalOption("prefs", chromePref);
-            //setLoggingCapabilities(options);
             determineHeadless(options);
             options.addArguments("--ignore-certificate-errors", "--window-size=1920,1080", "--remote-allow-origins=*");
             WebDriver driver = new ChromeDriver(options);
-            driver.manage().window().maximize();
-            driver.manage().timeouts().getImplicitWaitTimeout();
+            driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(24));
+            driver.manage().timeouts().scriptTimeout(Duration.ofSeconds(30));
+            //driver.manage().window().maximize();
+            //driver.manage().timeouts().getImplicitWaitTimeout();
             return driver;
         }
     },
@@ -86,16 +87,14 @@ public enum DriverType {
         }
     };
 
-    private static final String driverDir = "src/test/java/com/paylocity/tests/integrated/tests/drivers/";
-
     abstract WebDriver createDriver();
 
-    private static void setDriverPropertyIfUnset(String key, String absolutePath) {
-        String value = System.getProperty(key);
+    private static void setDriverPropertyIfUnset(String absolutePath) {
+        String value = System.getProperty("webdriver.chrome.driver");
         if (isNull(value)) {
             value = absolutePath;
-            System.setProperty(key, value);
         }
+        System.setProperty("webdriver.chrome.driver", value);
         assertTrue(new File(value).exists(), "Driver does not exist at: " + value);
     }
 
@@ -106,7 +105,7 @@ public enum DriverType {
     }
     private static void determineHeadless(ChromeOptions options) {
         String headless = System.getenv("HEADLESS");
-        if(headless == null || Boolean.valueOf(headless)) {
+        if(headless == null || Boolean.parseBoolean(headless)) {
             options.addArguments("--headless");
         }
     }
