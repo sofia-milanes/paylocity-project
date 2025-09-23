@@ -14,10 +14,6 @@ public class DashboardPage extends BasePage {
     private static final By firstNameField = By.cssSelector("input[name='firstName']");
     private static final By lastNameField = By.cssSelector("input[name='lastName']");
     private static final By dependentsField = By.cssSelector("input[name='dependants']");
-    private static final By addButton = By.cssSelector("button[id='addEmployee']");
-    private static final By updateButton = By.cssSelector("button[id='updateEmployee']");
-    private static final By confirmDeleteButton = By.cssSelector("button[id='deleteEmployee']");
-    private static final By logOutButton = By.cssSelector("a[href*='/Prod/Account/LogOut']");
 
     @Override
     protected By onPageMarkerLoc() {
@@ -52,16 +48,19 @@ public class DashboardPage extends BasePage {
     }
 
     public void clickAddEmployeeButton() {
-        click(addEmployeeButton);
+        WebElement addEmployeeBtn = paylocityWait().waitForElementToBeClickable(addEmployeeButton);
+        addEmployeeBtn.click();
     }
 
     public void clickAddButton() {
-        click(addButton);
+        WebElement addButton = driver().findElement(By.cssSelector("button[id='addEmployee']"));
+        addButton.click();
         paylocityWait().hardwait(3);
     }
 
     public void clickUpdateButton() {
-        click(updateButton);
+        WebElement updateButton = driver().findElement(By.cssSelector("button[id='updateEmployee']"));
+        updateButton.click();
         paylocityWait().hardwait(3);
     }
 
@@ -78,7 +77,8 @@ public class DashboardPage extends BasePage {
     }
 
     public void clickDeleteButtonByFirstName(String lastName) {
-        click(By.xpath(format("//tr[td[contains(.,'%s')]]//i[contains(@class, 'fa-times')]", lastName)));
+        WebElement deleteButton = driver().findElement(By.xpath(format("//tr[td[contains(.,'%s')]]//i[contains(@class, 'fa-times')]", lastName)));
+        deleteButton.click();
     }
 
     public void clickDeleteButton() {
@@ -92,15 +92,18 @@ public class DashboardPage extends BasePage {
     }
 
     public void clickConfirmDeleteButton() {
-        click(confirmDeleteButton);
+        WebElement confirmDeleteButton = driver().findElement(By.cssSelector("button[id='deleteEmployee']"));
+        confirmDeleteButton.click();
         paylocityWait().hardwait(3);
     }
 
     public void clickEditButton(String lastName) {
-        click(By.xpath(format("//tr[td[contains(.,'%s')]]//i[contains(@class, 'fa-edit')]", lastName)));
+        WebElement editButton = driver().findElement(By.xpath(format("//tr[td[contains(.,'%s')]]//i[contains(@class, 'fa-edit')]", lastName)));
+        editButton.click();
     }
 
     public void clickLogOutButton() {
-        click(logOutButton);
+        WebElement logOutButton = driver().findElement(By.cssSelector("a[href*='/Prod/Account/LogOut']"));
+        logOutButton.click();
     }
 }

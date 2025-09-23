@@ -2,18 +2,22 @@ package com.paylocity.tests.integrated.pages;
 
 import com.paylocity.tests.integrated.tests.utils.TestingContext;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 
 import java.util.Optional;
+
+import static com.paylocity.tests.integrated.driver.DriverFactory.driver;
 
 public class LoginPage extends BasePage {
     private static final By userNameField = By.cssSelector("input[name='Username']");
     private static final By passwordField = By.cssSelector("input[name='Password']");
-    private static final By loginButton = By.cssSelector("button[type='submit']");
+
 
     public void doLogin(String username, String password) {
         enterUsername(username);
         enterPassword(password);
-        click(loginButton, true);
+        WebElement loginButton = driver().findElement(By.cssSelector("button[type='submit']"));
+        loginButton.click();
     }
 
     @Override
@@ -36,5 +40,4 @@ public class LoginPage extends BasePage {
     public void enterPassword(String password) {
         enterText(passwordField, password, false);
     }
-
 }

@@ -1,17 +1,12 @@
 package com.paylocity.tests.integrated.tests.utils;
 
 import org.openqa.selenium.*;
-import org.openqa.selenium.support.ui.ExpectedCondition;
-import org.openqa.selenium.support.ui.FluentWait;
-import org.openqa.selenium.support.ui.Wait;
-import org.testng.Assert;
+import org.openqa.selenium.support.ui.*;
 
 import java.time.Duration;
-import java.util.List;
 
 import static com.paylocity.tests.integrated.driver.DriverFactory.driver;
 import static org.openqa.selenium.support.ui.ExpectedConditions.elementToBeClickable;
-import static org.openqa.selenium.support.ui.ExpectedConditions.stalenessOf;
 
 public class PaylocityWait {
 
@@ -26,19 +21,13 @@ public class PaylocityWait {
         this.jsExec = (JavascriptExecutor) driver();
     }
 
-    public List<WebElement> ForMany(By locator, boolean skipStabilityCheck) {
-        if (!skipStabilityCheck) {
-        }
-        Wait<WebDriver> wait = new FluentWait<>(driver())
-                .withTimeout(Duration.ofSeconds(30))
-                .pollingEvery(Duration.ofMillis(100))
-                .ignoring(NoSuchElementException.class);
-        try {
-            wait.until(elementToBeClickable(locator));
-        } catch (TimeoutException e) {
-            System.out.println("Element not found");
-        }
-        return driver().findElements(locator);
+    /**
+     * Waits for an element to be clickable
+     * @param locator The locator to find the element
+     * @return The WebElement once it is clickable
+     */
+    public WebElement waitForElementToBeClickable(By locator) {
+        return wait.until(elementToBeClickable(locator));
     }
 
     public WebElement For(By locator, boolean skipStabilityCheck) {
@@ -56,38 +45,8 @@ public class PaylocityWait {
         return For(locator, false);
     }
 
-    public void untilElementNotPresent(WebElement element) {
-        until(stalenessOf(element), true);
-    }
-
-    public <T> void until(ExpectedCondition<T> condition, boolean allowMissing) {
-        try {
-            FluentWait<WebDriver> myWait = new FluentWait<>(driver())
-                    .withTimeout(Duration.ofSeconds(30))
-                    .pollingEvery(Duration.ofMillis(100));
-            if (allowMissing) {
-                myWait.ignoring(NoSuchElementException.class);
-            }
-            myWait.until(condition);
-        } catch (WebDriverException e) {
-            Assert.fail("Time out on waiting until condition: \"" + condition + "\".\n" + e.getMessage());
-        }
-    }
-
     public void waitUntilStable() {
         waitForDocument();
-        waitForAngular();
-    }
-
-    private void waitForAngular() {
-        try {
-            Object angularCheck = jsExec.executeScript("return typeof window.getAngularTestability;");
-            boolean isAngular = (angularCheck != null && !angularCheck.toString().equals("undefined"));
-            if (isAngular) {
-                waitForScript("return window.getAllAngularTestabilities().findIndex(x=>!x.isStable()) === -1;");
-            }
-        } catch (WebDriverException ignored) {
-        }
     }
 
     private void waitForScript(String script) {
